@@ -1,8 +1,8 @@
-name: Coding standards
-on: [push, pull_request]
+name: Tests
+on: [push]
 jobs:
-  lint:
-    name: Coding standards
+  test:
+    name: Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,5 +36,5 @@ jobs:
       - name: Install dependencies with composer
         run: composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
-      - name: Run code quality analysis
-        run: make lint
+      - name: Run tests
+        run: make test

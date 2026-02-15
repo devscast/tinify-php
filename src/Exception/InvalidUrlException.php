@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Devscast\Tinify\Exception;
 
+use InvalidArgumentException;
+
 /**
- * Class InvalidUrlException
  * @package Devscast\Tinify\Exception
  * @author bernard-ng <bernard@devscast.tech>
  */
-class InvalidUrlException extends \InvalidArgumentException
+class InvalidUrlException extends InvalidArgumentException
 {
     public function __construct(string $url)
     {

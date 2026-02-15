@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Devscast\Tinify;
 
 /**
- * Class Source
  * @package Devscast\Tinify
  * @author bernard-ng <bernard@devscast.tech>
  */
 class Source
 {
-    public function __construct(private array $meta, private mixed $data)
-    {
+    public function __construct(
+        private array $meta,
+        private readonly mixed $data
+    ) {
         $this->meta = array_combine(
             keys: array_keys($meta),
             values: array_column($meta, column_key: 0)
@@ -56,6 +57,6 @@ class Source
 
     public function getCompressionCount(): int
     {
-        return $this->meta['compression-count'] ?? 0;
+        return intval($this->meta['compression-count'] ?? 0);
     }
 }

@@ -16,6 +16,11 @@
             "Devscast\\Tinify\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Devscast\\Tinify\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "bernard-ng",
@@ -24,13 +29,16 @@
     ],
     "minimum-stability": "stable",
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.6",
-        "symfony/var-dumper": "^6.0|^7.0",
-        "phpstan/phpstan": "^1.4"
+        "symfony/var-dumper": "^7.0|^8.0",
+        "rector/rector": "^2.3",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^13.0",
+        "symplify/easy-coding-standard": "^13.0"
     },
     "require": {
-        "php": ">=8.0",
-        "symfony/http-client": "^6.0|^7.0"
+        "php": ">=8.4",
+        "symfony/http-client": "^7.0|^8.0"
     },
     "repositories": [
         {

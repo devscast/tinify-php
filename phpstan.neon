@@ -2,5 +2,8 @@ parameters:
     level: 9
     paths:
         - src
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+        - tests
+
+    ignoreErrors:
+        - identifier: missingType.generics
+        - identifier: missingType.iterableValue

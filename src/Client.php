@@ -13,15 +13,15 @@ use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Throwable;
 
 /**
- * Class Client
  * @package Devscast\Tinify
  * @author bernard-ng <bernard@devscast.tech>
  */
 class Client
 {
-    private HttpClientInterface $http;
+    private readonly HttpClientInterface $http;
 
     public function __construct(string $token, ?string $proxy = null)
     {
@@ -30,7 +30,7 @@ class Client
                 baseUri: 'https://api.tinify.com',
                 defaultOptions: [
                     'auth_basic' => $token,
-                    'proxy' => $proxy
+                    'proxy' => $proxy,
                 ]
             ),
             strategy: new GenericRetryStrategy(delayMs: 500),
@@ -43,7 +43,7 @@ class Client
      */
     public function fromFile(string $path): Source
     {
-        return $this->fromBuffer((string)file_get_contents($path));
+        return $this->fromBuffer((string) file_get_contents($path));
     }
 
     /**
@@ -51,7 +51,9 @@ class Client
      */
     public function fromBuffer(string $buffer): Source
     {
-        $response = $this->upload(['body' => $buffer]);
+        $response = $this->upload([
+            'body' => $buffer,
+        ]);
         return $this->createSourceFromResponse($response);
     }
 
@@ -60,11 +62,17 @@ class Client
      */
     public function fromUrl(string $url): Source
     {
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
             throw new InvalidUrlException($url);
         }
 
-        $response = $this->upload(['json' => ['source' => ['url' => $url]]]);
+        $response = $this->upload([
+            'json' => [
+                'source' => [
+                    'url' => $url,
+                ],
+            ],
+        ]);
         return $this->createSourceFromResponse($response);
     }
 
@@ -74,8 +82,12 @@ class Client
     public function preserve(Source $source, array $metadata = []): Source
     {
         $response = $this->upload(
-            option: ['json' => ['preserve' => $metadata]],
-            url: (string)$source->getLocation()
+            option: [
+                'json' => [
+                    'preserve' => $metadata,
+                ],
+            ],
+            url: (string) $source->getLocation()
         );
         return $this->createSourceFromResponse($response);
     }
@@ -86,12 +98,16 @@ class Client
     public function resize(Source $source, string $method, int $width, int $height): Source
     {
         $response = $this->upload(
-            option: ['json' => ['resize' => [
-                'method' => $method,
-                'width' => $width,
-                'height' => $height
-            ]]],
-            url: (string)$source->getLocation()
+            option: [
+                'json' => [
+                    'resize' => [
+                        'method' => $method,
+                        'width' => $width,
+                        'height' => $height,
+                    ],
+                ],
+            ],
+            url: (string) $source->getLocation()
         );
         return $this->createSourceFromResponse($response);
     }
@@ -101,10 +117,16 @@ class Client
      */
     public function toCloud(Source $source, string $bucket_path, StorageInterface $storage): Source
     {
-        $store = array_merge($storage->getConfiguration(), ['path' => $bucket_path,]);
+        $store = array_merge($storage->getConfiguration(), [
+            'path' => $bucket_path,
+        ]);
         $response = $this->upload(
-            option: ['json' => ['store' => $store]],
-            url: (string)$source->getLocation()
+            option: [
+                'json' => [
+                    'store' => $store,
+                ],
+            ],
+            url: (string) $source->getLocation()
         );
         return $this->createSourceFromResponse($response);
     }
@@ -136,22 +158,24 @@ class Client
             try {
                 $response = $this->http->request('GET', url: $source->getLocation());
                 return $this->createSourceFromResponse($response);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->createExceptionFromResponse($e);
             }
         }
+
         return $source;
     }
 
     /**
      * @throws NetworkException
+     * @param array<string, mixed> $option
      */
     private function upload(array $option, string $url = '/shrink'): ResponseInterface
     {
         try {
             return $this->http->request('POST', url: $url, options: $option);
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 
@@ -159,7 +183,7 @@ class Client
      * @throws NetworkException
      * @return never
      */
-    private function createExceptionFromResponse(\Throwable $exception): void
+    private function createExceptionFromResponse(Throwable $exception): void
     {
         if ($exception instanceof HttpExceptionInterface) {
             try {
@@ -170,7 +194,7 @@ class Client
                     type: $body['error'],
                     status: $response->getStatusCode()
                 );
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 throw new NetworkException($exception->getMessage());
             }
         } else {
@@ -188,8 +212,8 @@ class Client
                 meta: $response->getHeaders(true),
                 data: $response->getContent(true)
             );
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 }
